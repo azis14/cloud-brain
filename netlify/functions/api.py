@@ -1,4 +1,4 @@
-import magnum
+import mangum
 from main import app  # Import your FastAPI app object
 
 # Create the handler function that Netlify will use
