@@ -1,0 +1,12 @@
+fastapi
+uvicorn[standard]
+pydantic
+python-dotenv
+pymongo
+motor
+google-generativeai
+notion-client
+httpx
+sentence-transformers
+numpy
+tiktoken
