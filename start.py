@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Startup script for the Second Brain API
+Startup script for the Cloud Brain API
 """
 import sys
 import subprocess
@@ -52,7 +52,7 @@ def check_dependencies():
 
 def main():
     """Main startup function"""
-    print("🚀 Starting Second Brain API...\n")
+    print("🚀 Starting Cloud Brain API...\n")
     
     # Check environment setup
     if not check_env_file():

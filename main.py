@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 # Initialize FastAPI app
 app = FastAPI(
-    title="Second Brain API",
+    title="Cloud Brain API",
     description="FastAPI application to interact with Notion API and provide RAG capabilities",
     version="1.0.0"
 )
@@ -48,7 +48,7 @@ def get_notion_client():
 @app.get("/")
 async def root():
     """Root endpoint"""
-    return {"message": "Second Brain API is running"}
+    return {"message": "Cloud Brain API is running"}
 
 @app.get("/health")
 async def health_check():

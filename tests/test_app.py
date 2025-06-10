@@ -1,5 +1,5 @@
 """
-Simple tests for the Second Brain API
+Simple tests for the Cloud Brain API
 """
 import pytest
 from fastapi.testclient import TestClient
@@ -18,7 +18,7 @@ def test_root_endpoint(test_client):
     """Test the root endpoint"""
     response = test_client.get("/")
     assert response.status_code == 200
-    assert response.json() == {"message": "Second Brain API is running"}
+    assert response.json() == {"message": "Cloud Brain API is running"}
 
 def test_health_check_success(test_client):
     """Test health check when Notion API is accessible"""
