@@ -46,6 +46,12 @@ MIN_SIMILARITY_SCORE=0.7
 # Other Configurations
 CORS_ALLOW_ORIGINS=could be '*' or specific origins here
 API_SECRET_KEY=generate_random_string_here
+
+# WAHA configuration
+WHITELISTED_NUMBERS=your_comma_separated_phone_numbers_here
+WAHA_API_URL=your_url_to_waha_api_here
+WAHA_API_KEY=your_waha_api_key_here
+WAHA_SESSION_NAME=your_waha_session_name_here
 ```
 
 ### 2. MongoDB Atlas Setup
