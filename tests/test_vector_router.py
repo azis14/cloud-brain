@@ -4,20 +4,31 @@ Unit tests for vector_router.py
 import pytest
 import os
 from unittest.mock import patch, MagicMock, AsyncMock
+
+mock_vector_db_instance = AsyncMock()
+mock_vector_db_instance.get_stats.return_value = {"total_chunks": 100, "unique_pages": 10}
+mock_vector_db_instance.generate_embedding.return_value = [0.1, 0.2, 0.3] * 100  # 300 dim embedding
+mock_vector_db_instance.embedding_model_name = "test-embedding-model"
+mock_vector_db_instance.store_notion_page.return_value = {
+    "status": "success",
+    "chunks_stored": 5
+}
+mock_vector_db_instance.ensure_vector_index = AsyncMock()
+
+# Patch the VectorDB class in the `vector_db` module.
+patch('vector_db.VectorDB', return_value=mock_vector_db_instance).start()
+
+mock_rag_service_instance = AsyncMock()
+mock_rag_service_instance.model_name = "test-gemini-model"
+patch('services.rag_service.RAGService', return_value=mock_rag_service_instance).start()
+
+# We can also patch the dependencies used by the router directly
+patch('motor.motor_asyncio.AsyncIOMotorClient', return_value=MagicMock()).start()
+patch('tiktoken.get_encoding', return_value=MagicMock()).start()
+patch('notion_client.AsyncClient', new_callable=AsyncMock).start()
+
 from fastapi.testclient import TestClient
 from routers.vector_router import lifespan, _sync_database_background
-
-# Mock the SentenceTransformer and other external classes before importing anything
-# that might use them
-sentence_transformer_mock = MagicMock()
-sentence_transformer_mock.get_sentence_embedding_dimension.return_value = 300
-
-motor_client_mock = MagicMock()
-
-# Apply all necessary mocks for external dependencies
-patch('sentence_transformers.SentenceTransformer', return_value=sentence_transformer_mock).start()
-patch('motor.motor_asyncio.AsyncIOMotorClient', return_value=motor_client_mock).start()
-patch('tiktoken.get_encoding', return_value=MagicMock()).start()
 
 @pytest.fixture(scope="module")
 def test_client():
