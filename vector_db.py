@@ -3,9 +3,8 @@ Vector database utilities for storing and retrieving embeddings in MongoDB Atlas
 """
 import os
 import logging
-from typing import List, Dict, Any, Optional, Tuple
+from typing import List, Dict, Any
 from datetime import datetime
-import numpy as np
 from motor.motor_asyncio import AsyncIOMotorClient
 from sentence_transformers import SentenceTransformer
 import tiktoken
