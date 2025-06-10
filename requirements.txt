@@ -10,7 +10,7 @@ filelock
 fsspec
 google-ai-generativelanguage
 google-api-core
-google-api-python-client>=2.0.0
+google-api-python-client==2.171.0
 google-auth
 google-auth-httplib2
 google-generativeai
