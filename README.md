@@ -1,8 +1,9 @@
 # Cloud Brain
 [![codecov](https://codecov.io/github/azis14/cloud-brain/graph/badge.svg?token=JLIHMRS0QW)](https://codecov.io/github/azis14/cloud-brain)
+[![License](https://img.shields.io/github/license/azis14/second-brain?style=for-the-badge)](https://github.com/azis14/second-brain/blob/main/LICENSE)
 
-[![Buy Me A Coffee](https://img.shields.io/badge/Buy%20Me%20A%20Coffee-000000?style=flat&logo=buy-me-a-coffee&logoColor=white)](https://clicky.id/azis14/support/coffee)
-[![More About Me](https://img.shields.io/badge/More%20About%20Me-000000?style=flat&logo=about.me&logoColor=white)](https://www.azis14.my.id/)
+[![Buy Me A Coffee](https://img.shields.io/badge/Buy%20Me%20A%20Coffee-E5E5E5?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black)](https://clicky.id/azis14/support/coffee)
+[![More About Me](https://img.shields.io/badge/More%20About%20Me-E5E5E5?style=for-the-badge&logo=about.me&logoColor=black)](https://www.azis14.my.id/)
 
 A FastAPI application that connects to the Notion API and provides RAG (Retrieval-Augmented Generation) capabilities using MongoDB Atlas Vector Search and Google AI Studio.
 
