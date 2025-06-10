@@ -1,10 +1,11 @@
-from fastapi import FastAPI, HTTPException, Depends
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 import os
 from dotenv import load_dotenv
 from notion_client import Client
 import logging
 from routers import vector_router
+from security import Secured
 
 # Load environment variables
 load_dotenv()
@@ -50,7 +51,7 @@ async def root():
     """Root endpoint"""
     return {"message": "Cloud Brain API is running"}
 
-@app.get("/health")
+@app.get("/health", dependencies=[Secured])
 async def health_check():
     """Health check endpoint"""
     try:

@@ -12,6 +12,7 @@ from utils.notion_utils import NotionUtils
 import os
 from dotenv import load_dotenv
 from contextlib import asynccontextmanager
+from security import Secured
 
 load_dotenv()
 logger = logging.getLogger(__name__)
@@ -42,7 +43,6 @@ if notion_api_key:
     notion = AsyncClient(auth=notion_api_key)
     notion_utils = NotionUtils(notion)
 
-# Pydantic models
 class SyncRequest(BaseModel):
     force_update: bool = True
     page_limit: Optional[int] = 100
@@ -59,7 +59,7 @@ def get_notion_client():
 def get_notion_utils():
     return notion_utils
 
-@router.get("/stats")
+@router.get("/stats", dependencies=[Secured])
 async def get_vector_db_stats(db: VectorDB = Depends(get_vector_db)):
     """Get vector database statistics"""
     try:
@@ -69,7 +69,7 @@ async def get_vector_db_stats(db: VectorDB = Depends(get_vector_db)):
         logger.error(f"Error getting stats: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.post("/sync")
+@router.post("/sync", dependencies=[Secured])
 async def sync_database(
     request: SyncRequest,
     background_tasks: BackgroundTasks,
@@ -174,7 +174,7 @@ async def _sync_database_background(
     except Exception as e:
         logger.error(f"Error in background database sync: {str(e)}")
 
-@router.get("/health")
+@router.get("/health", dependencies=[Secured])
 async def vector_health_check(
     db: VectorDB = Depends(get_vector_db),
     rag: RAGService = Depends(get_rag_service)
@@ -202,7 +202,7 @@ async def vector_health_check(
         raise HTTPException(status_code=503, detail=f"Service unavailable: {str(e)}")
 
 # Chat-like interface
-@router.post("/chat")
+@router.post("/chat", dependencies=[Secured])
 async def chat_with_knowledge_base(
     question: str = Query(..., description="Your question"),
     rag: RAGService = Depends(get_rag_service)

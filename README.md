@@ -41,6 +41,10 @@ MAX_CHUNK_TOKENS=500
 CHUNK_OVERLAP_TOKENS=50
 MAX_CONTEXT_CHUNKS=5
 MIN_SIMILARITY_SCORE=0.7
+
+# Other Configurations
+CORS_ALLOW_ORIGINS=could be '*' or specific origins here
+API_SECRET_KEY=generate_random_string_here
 ```
 
 ### 2. MongoDB Atlas Setup

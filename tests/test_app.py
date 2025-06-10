@@ -9,7 +9,10 @@ import os
 @pytest.fixture(scope="module")
 def test_client():
     # Patch environment variables before importing the app
-    with patch.dict(os.environ, {"NOTION_API_KEY": "test_key"}):
+    with patch.dict(os.environ, {
+        "NOTION_API_KEY": "test_key",
+        "API_SECRET_KEY": "test_api_key"
+    }):
         from main import app
         client = TestClient(app)
         yield client
@@ -24,7 +27,7 @@ def test_health_check_success(test_client):
     """Test health check when Notion API is accessible"""
     with patch('main.notion') as mock_notion:
         mock_notion.users.me.return_value = {"id": "test_user"}
-        response = test_client.get("/health")
+        response = test_client.get("/health", headers={"X-API-KEY": "test_api_key"})
         assert response.status_code == 200
         data = response.json()
         assert data["status"] == "healthy"
@@ -34,7 +37,7 @@ def test_health_check_failure(test_client):
     """Test health check when Notion API is not accessible"""
     with patch('main.notion') as mock_notion:
         mock_notion.users.me.side_effect = Exception("API Error")
-        response = test_client.get("/health")
+        response = test_client.get("/health", headers={"X-API-KEY": "test_api_key"})
         assert response.status_code == 503
 
 def test_notion_utils_import():
