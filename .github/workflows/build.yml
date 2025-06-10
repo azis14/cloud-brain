@@ -10,6 +10,22 @@ jobs:
   build-and-test:
     runs-on: ubuntu-latest
 
+    env:
+      NOTION_API_KEY: test_notion_api_key
+      NOTION_DATABASE_IDS: db1,db2
+      MONGODB_URI: mongodb://localhost:27017
+      MONGODB_DATABASE: test_db
+      MONGODB_COLLECTION: test_collection
+      GOOGLE_API_KEY: test_google_api_key
+      GOOGLE_MODEL: test_google_model
+      EMBEDDING_MODEL: test_embedding_model
+      MAX_CHUNK_TOKENS: "500"
+      CHUNK_OVERLAP_TOKENS: "50"
+      MAX_CONTEXT_CHUNKS: "5"
+      MIN_SIMILARITY_SCORE: "0.7"
+      CORS_ALLOW_ORIGINS: "*"
+      API_SECRET_KEY: test_api_secret_key
+
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
