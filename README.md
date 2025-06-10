@@ -1,4 +1,4 @@
-# Second Brain API
+# Cloud Brain
 
 A FastAPI application that connects to the Notion API and provides RAG (Retrieval-Augmented Generation) capabilities using MongoDB Atlas Vector Search and Google AI Studio.
 
