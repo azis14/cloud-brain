@@ -1,6 +1,10 @@
 # Cloud Brain
 [![codecov](https://codecov.io/github/azis14/cloud-brain/graph/badge.svg?token=JLIHMRS0QW)](https://codecov.io/github/azis14/cloud-brain)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
+[![Python](https://img.shields.io/badge/Python-3776AB?logo=python&logoColor=fff)](#)
+[![FastAPI](https://img.shields.io/badge/FastAPI-009485.svg?logo=fastapi&logoColor=white)](#)
+[![MongoDB](https://img.shields.io/badge/MongoDB-%234ea94b.svg?logo=mongodb&logoColor=white)](#)
+[![Notion](https://img.shields.io/badge/Notion-000?logo=notion&logoColor=fff)](#)
 
 A FastAPI application that connects to the Notion API and provides RAG (Retrieval-Augmented Generation) capabilities using MongoDB Atlas Vector Search and Google AI Studio.
 
@@ -96,6 +100,44 @@ Once the server is running, visit:
    - Open the database in Notion
    - Click "Share" → "Invite"
    - Search for your integration name and invite it
+
+## WAHA (WhatsApp HTTP API) Setup
+
+WAHA enables WhatsApp integration, allowing your application to receive and respond to WhatsApp messages with AI-generated answers based on your Notion content.
+
+### Quick Setup
+
+1. **Install and run WAHA** using Docker:
+   ```bash
+   docker pull devlikeapro/waha
+   docker run -it --rm -p 3000:3000 --name waha devlikeapro/waha
+   ```
+
+2. **Connect WhatsApp**: Open `http://localhost:3000`, create a session, and scan the QR code with your phone.
+
+3. **Configure environment variables** in your `.env` file:
+   ```env
+   WAHA_API_URL=http://localhost:3000
+   WAHA_API_KEY=your_waha_api_key_here
+   WAHA_SESSION_NAME=default
+   WHITELISTED_NUMBERS=1234567890,9876543210
+   ```
+
+4. **Set webhook URL** in WAHA dashboard to: `http://your-app-domain.com/waha/webhook`
+
+### How it works
+- Incoming WhatsApp messages are sent to your application via webhook
+- Only whitelisted numbers can interact with the bot
+- Messages are processed through the RAG system and responses are sent back via WhatsApp
+
+For detailed installation, configuration, and production deployment instructions, visit the [WAHA official documentation](https://waha.devlike.pro/docs/overview/quick-start).
+
+### Host Waha on Sumopod
+
+Instead of running WAHA locally, you can host WAHA+ on SumoPod, which offers low cost hosting (starts from IDR20K/month) for small projects like this one. Follow these steps:
+- Sign up for an account on [SumoPod](https://sumopod.com/register?ref=397bb660-81e6-48b8-919d-c0868301d72f)
+- Deploy your WAHA instance by clicking the "Deploy Now" button below.
+- Once deployed, follow the setup guide above to configure your WAHA instance.
 
 ## Development
 
