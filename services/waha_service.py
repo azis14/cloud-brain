@@ -1,7 +1,7 @@
 """
 WAHA service for handling WhatsApp messages and interactions with WAHA API.
 """
-import logging, os, httpx
+import logging, os, requests
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -34,12 +34,13 @@ class WahaService:
         headers = {
             "X-Api-Key": self.api_key,
         }
-        async with httpx.AsyncClient() as client:
-            try:
-                response = await client.post(send_url, json=payload, headers=headers)
-                response.raise_for_status()
-                logger.info(f"Successfully sent reply to {recipient}")
-            except httpx.HTTPStatusError as e:
-                logger.error(f"Error sending message to {recipient}: {e.response.text}")
-            except httpx.RequestError as e:
-                logger.error(f"An error occurred while requesting {e.request.url!r}.")
+        try:
+            response = requests.post(send_url, json=payload, headers=headers)
+            response.raise_for_status()
+            logger.info(f"Successfully sent reply to {recipient}")
+        except requests.exceptions.HTTPError as e:
+            logger.error(f"Error sending message to {recipient}: {e.response.text}")
+        except requests.exceptions.RequestException as e:
+            logger.error(f"An error occurred while requesting {e.request.url!r}: {e}")
+        except Exception as e:
+            logger.error(f"Unexpected error while sending message to {recipient}: {str(e)}")

@@ -1,78 +1,28 @@
-annotated-types
-anyio
-cachetools
-certifi
-charset-normalizer
-click
-dnspython
+# Core FastAPI and web framework dependencies
 fastapi
-filelock
-fsspec
-google-ai-generativelanguage
-google-api-core
-google-api-python-client==2.171.0
-google-auth
-google-auth-httplib2
-google-generativeai
-googleapis-common-protos
-grpcio
-grpcio-status
-h11
-hf-xet
-httpcore
-httplib2
-httptools
-httpx
-huggingface-hub
-idna
-iniconfig
-Jinja2
-joblib
-mangum
-MarkupSafe
-motor
-mpmath
-networkx
-notion-client
-numpy
-packaging
-pillow
-pluggy
-proto-plus
-protobuf
-pyasn1
-pyasn1_modules
+uvicorn[standard]
+python-dotenv
+
+# Security and authentication
 pydantic
-pydantic_core
-Pygments
-pymongo
-pyparsing
+
+# Database and vector storage
+motor # MongoDB async driver
+pymongo # MongoDB driver
+
+# AI and ML dependencies
+google-generativeai # Google AI Studio/Gemini
+sentence-transformers # For embeddings
+tiktoken # OpenAI tokenizer
+
+# Notion API
+notion-client
+
+# HTTP client for external APIs
+httpx
+requests
+
+# Testing dependencies (development)
 pytest
 pytest-asyncio
-python-dotenv
-PyYAML
-regex
-requests
-rsa
-safetensors
-scikit-learn
-scipy
-sentence-transformers
-setuptools
-sniffio
-starlette
-sympy
-threadpoolctl
-tiktoken
-tokenizers
-torch
-tqdm
-transformers
-typing-inspection
-typing_extensions
-uritemplate
-urllib3
-uvicorn
-uvloop
-watchfiles
-websockets
+pytest-mock

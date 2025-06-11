@@ -2,7 +2,6 @@
 WAHA webhook router for handling incoming WhatsApp messages.
 """
 from fastapi import APIRouter
-from pydantic import BaseModel
 from dotenv import load_dotenv
 from security import Secured
 from services.rag_service import RAGService
