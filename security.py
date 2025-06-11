@@ -1,5 +1,3 @@
-# security.py
-
 from fastapi import Security, HTTPException, status, Depends
 from fastapi.security import APIKeyHeader
 import os

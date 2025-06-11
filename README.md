@@ -1,6 +1,10 @@
 # Cloud Brain
 [![codecov](https://codecov.io/github/azis14/cloud-brain/graph/badge.svg?token=JLIHMRS0QW)](https://codecov.io/github/azis14/cloud-brain)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
+[![Python](https://img.shields.io/badge/Python-3776AB?logo=python&logoColor=fff)](#)
+[![FastAPI](https://img.shields.io/badge/FastAPI-009485.svg?logo=fastapi&logoColor=white)](#)
+[![MongoDB](https://img.shields.io/badge/MongoDB-%234ea94b.svg?logo=mongodb&logoColor=white)](#)
+[![Notion](https://img.shields.io/badge/Notion-000?logo=notion&logoColor=fff)](#)
 
 A FastAPI application that connects to the Notion API and provides RAG (Retrieval-Augmented Generation) capabilities using MongoDB Atlas Vector Search and Google AI Studio.
 
@@ -47,6 +51,12 @@ MIN_SIMILARITY_SCORE=0.7
 # Other Configurations
 CORS_ALLOW_ORIGINS=could be '*' or specific origins here
 API_SECRET_KEY=generate_random_string_here
+
+# WAHA configuration
+WHITELISTED_NUMBERS=your_comma_separated_phone_numbers_here
+WAHA_API_URL=your_url_to_waha_api_here
+WAHA_API_KEY=your_waha_api_key_here
+WAHA_SESSION_NAME=your_waha_session_name_here
 ```
 
 ### 2. MongoDB Atlas Setup
@@ -91,53 +101,43 @@ Once the server is running, visit:
    - Click "Share" → "Invite"
    - Search for your integration name and invite it
 
-## Property Types Supported
+## WAHA (WhatsApp HTTP API) Setup
 
-The API handles all Notion property types:
+WAHA enables WhatsApp integration, allowing your application to receive and respond to WhatsApp messages with AI-generated answers based on your Notion content.
 
-- **Text**: `title`, `rich_text`
-- **Numbers**: `number`
-- **Selections**: `select`, `multi_select`
-- **Dates**: `date`
-- **People**: `people`
-- **Files**: `files`
-- **Checkboxes**: `checkbox`
-- **URLs**: `url`
-- **Email**: `email`
-- **Phone**: `phone_number`
-- **Relations**: `relation`
-- **Timestamps**: `created_time`, `last_edited_time`
-- **Users**: `created_by`, `last_edited_by`
+### Quick Setup
 
-## Filter Types
+1. **Install and run WAHA** using Docker:
+   ```bash
+   docker pull devlikeapro/waha
+   docker run -it --rm -p 3000:3000 --name waha devlikeapro/waha
+   ```
 
-Available filter types for the simplified query endpoint:
+2. **Connect WhatsApp**: Open `http://localhost:3000`, create a session, and scan the QR code with your phone.
 
-### Text Filters
-- `equals`, `does_not_equal`
-- `contains`, `does_not_contain`
-- `starts_with`, `ends_with`
-- `is_empty`, `is_not_empty`
+3. **Configure environment variables** in your `.env` file:
+   ```env
+   WAHA_API_URL=http://localhost:3000
+   WAHA_API_KEY=your_waha_api_key_here
+   WAHA_SESSION_NAME=default
+   WHITELISTED_NUMBERS=1234567890,9876543210
+   ```
 
-### Number Filters
-- `equals`, `does_not_equal`
-- `greater_than`, `less_than`
-- `greater_than_or_equal_to`, `less_than_or_equal_to`
+4. **Set webhook URL** in WAHA dashboard to: `http://your-app-domain.com/waha/webhook`
 
-### Date Filters
-- `equals`, `before`, `after`
-- `on_or_before`, `on_or_after`
+### How it works
+- Incoming WhatsApp messages are sent to your application via webhook
+- Only whitelisted numbers can interact with the bot
+- Messages are processed through the RAG system and responses are sent back via WhatsApp
 
-### Checkbox Filters
-- `checkbox_equals`
+For detailed installation, configuration, and production deployment instructions, visit the [WAHA official documentation](https://waha.devlike.pro/docs/overview/quick-start).
 
-## Error Handling
+### Host Waha on Sumopod
 
-The API includes comprehensive error handling:
-- Invalid database IDs return 404
-- Missing environment variables raise startup errors
-- Notion API errors are properly propagated
-- All endpoints include try-catch blocks with logging
+Instead of running WAHA locally, you can host WAHA+ on SumoPod, which offers low cost hosting (starts from IDR20K/month) for small projects like this one. Follow these steps:
+- Sign up for an account on [SumoPod](https://sumopod.com/register?ref=397bb660-81e6-48b8-919d-c0868301d72f)
+- Deploy your WAHA instance by clicking the "Deploy Now" button below.
+- Once deployed, follow the setup guide above to configure your WAHA instance.
 
 ## Development
 
