@@ -165,7 +165,10 @@ pytest
 This project is open source and available under the MIT License.
 
 ## Example Usage
-!['Example 1'](./assets/example_1.PNG)
+<a href="./assets/example_1.PNG" target="_blank">
+    <img src="./assets/example_1.PNG" alt="Example 1" width="200"/>
+</a>
+
 
 ## Support
 
