@@ -5,6 +5,7 @@
 [![FastAPI](https://img.shields.io/badge/FastAPI-009485.svg?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
 [![MongoDB](https://img.shields.io/badge/MongoDB-%234ea94b.svg?logo=mongodb&logoColor=white)](https://www.mongodb.com/)
 [![Notion](https://img.shields.io/badge/Notion-000?logo=notion&logoColor=fff)](https://www.notion.com/)
+[![WAHA](https://img.shields.io/badge/WAHA-25d366?logo=WhatsApp&logoColor=fff)](https://waha.devlike.pro/)
 
 A FastAPI application that connects to the Notion API and provides RAG (Retrieval-Augmented Generation) capabilities using MongoDB Atlas Vector Search and Google AI Studio.
 
@@ -162,6 +163,9 @@ pytest
 ## License
 
 This project is open source and available under the MIT License.
+
+## Example Usage
+!['Example 1'](./assets/example_1.PNG)
 
 ## Support
 
