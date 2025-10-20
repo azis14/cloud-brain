@@ -23,7 +23,7 @@ class RAGService:
         genai.configure(api_key=self.google_api_key)
         
         # Initialize model
-        self.model_name = os.getenv("GOOGLE_MODEL", "gemini-1.5-flash")
+        self.model_name = os.getenv("GOOGLE_MODEL", "gemini-2.5-flash")
         self.model = genai.GenerativeModel(self.model_name)
         
         # Initialize vector database

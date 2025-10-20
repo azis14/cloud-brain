@@ -42,7 +42,7 @@ MONGODB_COLLECTION=your_collection_name_here
 
 # Google AI Studio Configuration
 GOOGLE_API_KEY=your_google_ai_studio_api_key (optional, could use another LLM)
-GOOGLE_MODEL=(gemini-1.5-flash or other model)
+GOOGLE_MODEL=(gemini-2.5-flash or other model)
 
 # Vector Database Configuration (Optional - defaults provided)
 EMBEDDING_MODEL=all-MiniLM-L6-v2
