@@ -47,6 +47,8 @@ async def receive_whatsapp_message(payload: dict):
                     # Process the message
                     type_identification = await rag_service.identify_message(message_body)
 
+                    await waha_service.send_whatsapp_reply(sender_number_full, f"DEBUG: {type_identification}")
+
                     if type_identification == "SYNC":
                         await waha_service.send_whatsapp_reply(sender_number_full, "Sync command received. Starting synchronization...")
                         vectorService.start_sync_databases(force_update=True, page_limit=100)
