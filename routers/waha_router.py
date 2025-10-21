@@ -47,7 +47,8 @@ async def receive_whatsapp_message(payload: dict):
                     # Process the message
                     type_identification = await rag_service.identify_message(message_body)
 
-                    await waha_service.send_whatsapp_reply(sender_number_full, f"DEBUG: {type_identification}")
+                    logger.info(f"Message from {sender_number_full}: {message_body}")
+                    logger.info(f"Identified message type: {type_identification}")
 
                     if type_identification == "SYNC":
                         await waha_service.send_whatsapp_reply(sender_number_full, "Sync command received. Starting synchronization...")

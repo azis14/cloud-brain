@@ -4,8 +4,8 @@
 
 import logging
 import os
+import asyncio
 
-from fastapi import BackgroundTasks
 from vector_db import VectorDB
 from typing import Optional
 from notion_client import AsyncClient
@@ -22,7 +22,6 @@ class VectorService:
         self.db = VectorDB()
         self.notion_api_key = os.getenv("NOTION_API_KEY")
         self.notion_database_ids = os.getenv("NOTION_DATABASE_IDS", "").split(",") if os.getenv("NOTION_DATABASE_IDS") else []
-        self.background_tasks = BackgroundTasks()
 
         if self.notion_api_key:
             self.notion = AsyncClient(auth=self.notion_api_key)
@@ -33,11 +32,8 @@ class VectorService:
     def start_sync_databases(self, force_update: bool = True, page_limit: Optional[int] = 100):
         """Start syncing Notion databases in the background"""
         for database_id in self.notion_database_ids:
-            self.background_tasks.add_task(
-                self._sync_database_background,
-                database_id,
-                force_update,
-                page_limit
+            asyncio.create_task(
+                self._sync_database_background(database_id, force_update, page_limit)
             )
 
     
