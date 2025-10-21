@@ -41,7 +41,19 @@ class RAGService:
         message: str,
     ) -> str:
         """Identify the type of message"""
-        return PromptUtils.build_identify_prompt(message)
+        prompt = PromptUtils.build_identify_prompt(message)
+
+        response = await self.model.generate_content_async(
+                prompt,
+                generation_config=genai.types.GenerationConfig(
+                    temperature=0.7,
+                    max_output_tokens=1000,
+                    top_p=0.8,
+                    top_k=40
+                )
+            )
+            
+        return response.text.strip()
     
     async def answer_question(
         self,
