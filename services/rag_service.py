@@ -7,6 +7,7 @@ from typing import List, Dict, Any
 import google.generativeai as genai
 from dotenv import load_dotenv
 from vector_db import VectorDB
+from utils.prompt_utils import PromptUtils
 
 load_dotenv()
 logger = logging.getLogger(__name__)
@@ -34,6 +35,13 @@ class RAGService:
         self.min_similarity_score = float(os.getenv("MIN_SIMILARITY_SCORE", "0.7"))
         
         logger.info(f"RAG service initialized with model: {self.model_name}")
+
+    async def identify_message(
+        self,
+        message: str,
+    ) -> str:
+        """Identify the type of message"""
+        return PromptUtils.build_identify_prompt(message)
     
     async def answer_question(
         self,
@@ -104,7 +112,7 @@ class RAGService:
     async def _generate_answer(self, question: str, context: str) -> str:
         """Generate answer using Google AI with context"""
         try:
-            prompt = self._build_prompt(question, context)
+            prompt = PromptUtils.build_question_prompt(question, context)
             
             response = await self.model.generate_content_async(
                 prompt,
@@ -121,27 +129,6 @@ class RAGService:
         except Exception as e:
             logger.error(f"Error generating answer: {str(e)}")
             return f"I encountered an error while generating the answer: {str(e)}"
-    
-    def _build_prompt(self, question: str, context: str) -> str:
-        """Build the prompt for the AI model"""
-        prompt = f"""You are a helpful AI assistant that answers questions based on the provided context from a personal knowledge base. 
-
-Context from knowledge base:
-{context}
-
-Question: {question}
-
-Instructions:
-1. Answer the question based primarily on the provided context
-2. If the context doesn't contain enough information, say so clearly
-3. Be concise but comprehensive in your answer
-4. If you reference specific information, try to indicate source urls or page titles if available
-5. If the question cannot be answered from the context, explain what information would be needed
-6. You could add additional information from your own knowledge if it helps answer the question, but make it clear that this is additional context
-
-Answer:"""
-        
-        return prompt
     
     def _extract_rich_text(self, rich_text_array: List[Dict[str, Any]]) -> str:
         """Extract plain text from rich text array"""
