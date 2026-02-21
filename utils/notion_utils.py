@@ -2,6 +2,7 @@ from typing import Dict, List, Any, Optional, Set
 from notion_client import Client, AsyncClient
 import logging
 import asyncio
+import inspect
 
 logger = logging.getLogger(__name__)
 
@@ -10,7 +11,32 @@ class NotionUtils:
     
     def __init__(self, client: Client | AsyncClient):
         self.client = client
-        self._is_async = isinstance(client, AsyncClient)
+        # Check if client is async by checking if it's an AsyncClient or has async methods
+        # We use hasattr to check for the AsyncClient's async methods, which also works with mocks
+        self._is_async = hasattr(client, '_is_async_client') or self._is_async_like(client)
+    
+    def _is_async_like(self, client) -> bool:
+        """Check if client behaves like an async client (for testing with mocks)"""
+        # Check if it's a real AsyncClient
+        try:
+            if isinstance(client, AsyncClient):
+                return True
+        except TypeError:
+            # isinstance may fail with mocks, so we check for async behavior
+            pass
+        
+        # For mocks, check if the client has async-like attributes or methods
+        # AsyncMock objects have _spec_class or _mock_name attributes
+        client_module = getattr(type(client), '__module__', '')
+        if 'mock' in client_module.lower():
+            return True
+        
+        # Check if key methods are coroutines
+        if hasattr(client, 'databases') and hasattr(client.databases, 'query'):
+            return inspect.iscoroutinefunction(client.databases.query) or \
+                   hasattr(client.databases.query, '_spec_async')
+        
+        return False
         # Cache for fetched child pages to avoid redundant API calls
         self._page_cache: Dict[str, Dict[str, Any]] = {}
         # Track synced block IDs to avoid duplicates

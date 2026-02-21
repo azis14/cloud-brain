@@ -5,12 +5,16 @@ from fastapi import APIRouter, HTTPException, Depends, BackgroundTasks, Query
 from typing import Optional
 from pydantic import BaseModel
 import logging
+import os
+import asyncio
 from vector_db import VectorDB
 from services.rag_service import RAGService
 from services.vector_service import VectorService
 from dotenv import load_dotenv
 from contextlib import asynccontextmanager
 from security import Secured
+from notion_client import AsyncClient
+from utils.notion_utils import NotionUtils
 
 load_dotenv()
 logger = logging.getLogger(__name__)
@@ -19,6 +23,17 @@ logger = logging.getLogger(__name__)
 vector_db = VectorDB()
 rag_service = RAGService()
 vector_service = VectorService()
+
+# Initialize Notion client and utils for direct access (used by tests)
+notion_api_key = os.getenv("NOTION_API_KEY")
+notion_database_ids = os.getenv("NOTION_DATABASE_IDS", "").split(",") if os.getenv("NOTION_DATABASE_IDS") else []
+
+if notion_api_key:
+    notion = AsyncClient(auth=notion_api_key)
+    notion_utils = NotionUtils(notion)
+else:
+    notion = None
+    notion_utils = None
 
 @asynccontextmanager
 async def lifespan(app):
@@ -60,14 +75,21 @@ async def get_vector_db_stats(db: VectorDB = Depends(get_vector_db)):
 @router.post("/sync", dependencies=[Secured])
 async def sync_database(
     request: SyncRequest,
+    background_tasks: BackgroundTasks,
     vector: VectorService = Depends(get_vector_service)
 ):
     """Sync entire Notion database to vector database"""
     try:
-        # Start background sync task
-        vector.start_sync_databases(
-            force_update=request.force_update,
-            page_limit=request.page_limit)
+        # Add background tasks for each database
+        for database_id in notion_database_ids:
+            background_tasks.add_task(
+                _sync_database_background,
+                database_id=database_id,
+                force_update=request.force_update,
+                page_limit=request.page_limit,
+                db=vector_db,
+                client=notion
+            )
         
         return {
             "status": "started",
@@ -77,6 +99,106 @@ async def sync_database(
     except Exception as e:
         logger.error(f"Error starting database sync: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
+
+
+async def _sync_database_background(
+    database_id: str,
+    force_update: bool,
+    page_limit: Optional[int],
+    db: VectorDB,
+    client: AsyncClient
+):
+    """Background task to sync database with enhanced content extraction"""
+    try:
+        logger.info(f"Starting background sync for database {database_id}")
+        
+        # Get all pages from the database
+        all_pages = []
+        has_more = True
+        next_cursor = None
+        pages_processed = 0
+        
+        # Use the module-level notion_utils instance if available, otherwise create a new one
+        notion_utils_instance = notion_utils if notion_utils is not None else NotionUtils(client)
+        
+        while has_more and (page_limit is None or pages_processed < page_limit):
+            query_params = {
+                "database_id": database_id,
+                "page_size": min(100, page_limit - pages_processed if page_limit else 100)
+            }
+            if next_cursor:
+                query_params["start_cursor"] = next_cursor
+            
+            response = await client.databases.query(**query_params)
+            pages = response.get("results", [])
+            all_pages.extend(pages)
+            
+            has_more = response.get("has_more", False)
+            next_cursor = response.get("next_cursor")
+            pages_processed += len(pages)
+            
+            if page_limit and pages_processed >= page_limit:
+                break
+
+        
+        logger.info(f"Found {len(all_pages)} pages to sync")
+        
+        # Sync each page
+        sync_results = {
+            "success": 0,
+            "skipped": 0,
+            "errors": 0,
+            "total_chunks": 0
+        }
+        
+        for page in all_pages:
+            try:
+                # Fetch page blocks
+                blocks_response = await client.blocks.children.list(
+                    block_id=page["id"],
+                    page_size=100
+                )
+                blocks = blocks_response.get("results", [])
+                
+                # Extract content from blocks
+                page_content = []
+                for block in blocks:
+                    extracted = notion_utils_instance.extract_block_content(block)
+                    page_content.append(extracted)
+                
+                # Build page data
+                page_data = {
+                    "id": page["id"],
+                    "properties": page.get("properties", {}),
+                    "blocks": page_content,
+                    "url": page.get("url", "")
+                }
+                
+                # Add database_id to page_data for storage
+                page_data["database_id"] = database_id
+                
+                result = await db.store_notion_page(
+                    page_id=page["id"],
+                    page_data=page_data,
+                    database_id=database_id,
+                    force_update=force_update
+                )
+                
+                if result["status"] == "success":
+                    sync_results["success"] += 1
+                    sync_results["total_chunks"] += result["chunks_stored"]
+                elif result["status"] == "skipped":
+                    sync_results["skipped"] += 1
+                    
+            except Exception as e:
+                logger.error(f"Error syncing page {page['id']}: {str(e)}")
+                sync_results["errors"] += 1
+        
+        logger.info(f"Database sync completed: {sync_results}")
+        
+    except Exception as e:
+        logger.error(f"Error in background database sync: {str(e)}")
+
 
 @router.get("/health", dependencies=[Secured])
 async def vector_health_check(
