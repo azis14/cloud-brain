@@ -118,8 +118,8 @@ class VectorDB:
             raise
     
     async def store_notion_page(
-        self, 
-        page_id: str, 
+        self,
+        page_id: str,
         page_data: Dict[str, Any],
         database_id: str,
         force_update: bool = False
@@ -136,7 +136,7 @@ class VectorDB:
                     logger.info(f"Page {page_id} is up to date, skipping")
                     return {"status": "skipped", "reason": "up_to_date"}
             
-            # Extract text content from page properties
+            # Extract text content - prefer markdown_content if available (from enhanced extraction)
             text_content = self._extract_text_from_page(page_data)
             
             if not text_content.strip():
@@ -190,38 +190,93 @@ class VectorDB:
             raise
     
     def _extract_text_from_page(self, page_data: Dict[str, Any]) -> str:
-        """Extract text content from Notion page data"""
+        """Extract text content from Notion page data with enhanced extraction support"""
         text_parts = []
+        
+        # Check if markdown_content is available (from enhanced extraction)
+        markdown_content = page_data.get("markdown_content")
+        if markdown_content:
+            return markdown_content
         
         # Extract from properties
         properties = page_data.get("properties", {})
-        for prop_name, prop_data in properties.items():
-            prop_type = prop_data.get("type")
+        for prop_name, prop_value in properties.items():
+            # Skip title as it's handled separately
+            if prop_name == "title":
+                if prop_value:
+                    text_parts.append(f"Title: {prop_value}")
+                continue
             
-            if prop_type == "title":
-                title_text = self._extract_rich_text(prop_data.get("title", []))
-                if title_text:
-                    text_parts.append(f"Title: {title_text}")
-            
-            elif prop_type == "rich_text":
-                rich_text = self._extract_rich_text(prop_data.get("rich_text", []))
-                if rich_text:
-                    text_parts.append(f"{prop_name}: {rich_text}")
-            
-            elif prop_type == "select":
-                select_data = prop_data.get("select")
-                if select_data and select_data.get("name"):
-                    text_parts.append(f"{prop_name}: {select_data['name']}")
-            
-            elif prop_type == "multi_select":
-                multi_select_data = prop_data.get("multi_select", [])
-                if multi_select_data:
-                    values = [item.get("name", "") for item in multi_select_data]
-                    text_parts.append(f"{prop_name}: {', '.join(values)}")
-
+            # Handle different property types
+            if prop_value is not None:
+                if isinstance(prop_value, list):
+                    prop_value = ", ".join(str(v) for v in prop_value)
+                elif isinstance(prop_value, dict):
+                    # Handle date objects
+                    if "start" in prop_value:
+                        prop_value = f"{prop_value.get('start', '')} - {prop_value.get('end', '')}".strip()
+                    else:
+                        prop_value = str(prop_value)
+                text_parts.append(f"{prop_name}: {prop_value}")
+        
+        # Extract from blocks (legacy content field)
         contents = page_data.get("content", [])
         for content in contents:
-            text_parts.append(content.get("text", ""))
+            text = content.get("text", "")
+            if text:
+                text_parts.append(text)
+        
+        # Extract from blocks with children (nested content)
+        blocks = page_data.get("blocks", [])
+        if blocks:
+            nested_text = self._extract_text_from_blocks(blocks)
+            if nested_text.strip():
+                text_parts.append(nested_text)
+        
+        return "\n".join(text_parts)
+    
+    def _extract_text_from_blocks(self, blocks: List[Dict[str, Any]], depth: int = 0) -> str:
+        """Recursively extract text from block structure"""
+        text_parts = []
+        
+        for block in blocks:
+            # Skip duplicate or empty blocks
+            if block.get("skipped"):
+                continue
+            
+            # Extract text content
+            text = block.get("text", "")
+            if text:
+                text_parts.append(text)
+            
+            # Handle code blocks
+            if block.get("is_code"):
+                language = block.get("language", "")
+                code_text = block.get("text", "")
+                text_parts.append(f"Code ({language}):\n{code_text}")
+            
+            # Handle table rows
+            if block.get("type") == "table_row":
+                cells = block.get("cells", [])
+                if cells:
+                    text_parts.append(" | ".join(str(cell) for cell in cells))
+            
+            # Handle child pages
+            if block.get("type") == "child_page":
+                title = block.get("title", "")
+                if title:
+                    text_parts.append(f"Child Page: {title}")
+                # Include resolved child page content
+                resolved = block.get("resolved_content", {})
+                if resolved.get("blocks"):
+                    child_text = self._extract_text_from_blocks(resolved["blocks"], depth + 1)
+                    text_parts.append(child_text)
+            
+            # Recursively extract from children
+            children = block.get("children", [])
+            if children:
+                child_text = self._extract_text_from_blocks(children, depth + 1)
+                text_parts.append(child_text)
         
         return "\n".join(text_parts)
     

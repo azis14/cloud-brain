@@ -43,7 +43,7 @@ class VectorService:
         force_update: bool,
         page_limit: Optional[int]
     ):
-        """Background task to sync database"""
+        """Background task to sync database with enhanced content extraction"""
         try:
             logger.info(f"Starting background sync for database {database_id}")
             
@@ -84,15 +84,21 @@ class VectorService:
             }
             
             for page in all_pages:
-                pageContent = []
-                blocks_response = await self.notion.blocks.children.list(block_id=page["id"])
-                for block in blocks_response.get("results", []):
-                    pageContent.append(self.notion_utils.extract_block_content(block))
-                page["content"] = pageContent
                 try:
+                    # Use enhanced extraction with recursive block fetching
+                    page_data = await self.notion_utils.extract_complete_page_data(
+                        page_id=page["id"],
+                        include_child_pages=True,
+                        resolve_links=True,
+                        max_depth=10
+                    )
+                    
+                    # Add database_id to page_data for storage
+                    page_data["database_id"] = database_id
+                    
                     result = await self.db.store_notion_page(
                         page_id=page["id"],
-                        page_data=page,
+                        page_data=page_data,
                         database_id=database_id,
                         force_update=force_update
                     )

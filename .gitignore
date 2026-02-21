@@ -6,3 +6,4 @@ __pycache__
 .vscode/
 examples/
 .pytest_cache/
+plans/
