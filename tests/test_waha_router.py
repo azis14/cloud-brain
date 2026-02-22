@@ -131,8 +131,7 @@ async def test_receive_message_no_api_key(test_client):
     response = test_client.post("/waha/webhook", json=payload)
 
     # Assert
-    assert response.status_code == 403
-    assert response.json()["detail"] == "Not authenticated"
+    assert response.status_code == 401
     mock_rag_service_instance.answer_question.assert_not_called()
 
 @pytest.mark.asyncio

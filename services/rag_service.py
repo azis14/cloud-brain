@@ -148,9 +148,13 @@ class RAGService:
             return ""
         
         return "".join([
-            text_obj.get("plain_text", "") 
+            text_obj.get("plain_text", "")
             for text_obj in rich_text_array
         ])
+    
+    def _build_prompt(self, question: str, context: str) -> str:
+        """Build the prompt for the AI model"""
+        return PromptUtils.build_question_prompt(question, context)
     
     async def close(self):
         """Close connections"""

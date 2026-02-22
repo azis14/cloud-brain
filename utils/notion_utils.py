@@ -14,6 +14,10 @@ class NotionUtils:
         # Check if client is async by checking if it's an AsyncClient or has async methods
         # We use hasattr to check for the AsyncClient's async methods, which also works with mocks
         self._is_async = hasattr(client, '_is_async_client') or self._is_async_like(client)
+        # Cache for fetched child pages to avoid redundant API calls
+        self._page_cache: Dict[str, Dict[str, Any]] = {}
+        # Track synced block IDs to avoid duplicates
+        self._synced_block_ids: Set[str] = set()
     
     def _is_async_like(self, client) -> bool:
         """Check if client behaves like an async client (for testing with mocks)"""
@@ -37,10 +41,6 @@ class NotionUtils:
                    hasattr(client.databases.query, '_spec_async')
         
         return False
-        # Cache for fetched child pages to avoid redundant API calls
-        self._page_cache: Dict[str, Dict[str, Any]] = {}
-        # Track synced block IDs to avoid duplicates
-        self._synced_block_ids: Set[str] = set()
     
     # ==================== Page Property Extraction ====================
     

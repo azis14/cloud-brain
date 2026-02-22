@@ -200,24 +200,49 @@ class VectorDB:
         
         # Extract from properties
         properties = page_data.get("properties", {})
-        for prop_name, prop_value in properties.items():
-            # Skip title as it's handled separately
-            if prop_name == "title":
-                if prop_value:
-                    text_parts.append(f"Title: {prop_value}")
+        for prop_name, prop_data in properties.items():
+            # Handle different property types properly
+            if prop_data is None:
                 continue
+                
+            prop_type = prop_data.get("type") if isinstance(prop_data, dict) else None
             
-            # Handle different property types
-            if prop_value is not None:
-                if isinstance(prop_value, list):
-                    prop_value = ", ".join(str(v) for v in prop_value)
-                elif isinstance(prop_value, dict):
-                    # Handle date objects
-                    if "start" in prop_value:
-                        prop_value = f"{prop_value.get('start', '')} - {prop_value.get('end', '')}".strip()
-                    else:
-                        prop_value = str(prop_value)
-                text_parts.append(f"{prop_name}: {prop_value}")
+            if prop_type == "title":
+                title_text = self._extract_rich_text(prop_data.get("title", []))
+                if title_text:
+                    text_parts.append(f"Title: {title_text}")
+            elif prop_type == "rich_text":
+                rich_text = self._extract_rich_text(prop_data.get("rich_text", []))
+                if rich_text:
+                    text_parts.append(f"{prop_name}: {rich_text}")
+            elif prop_type == "select":
+                select_data = prop_data.get("select")
+                if select_data:
+                    text_parts.append(f"{prop_name}: {select_data.get('name', '')}")
+            elif prop_type == "multi_select":
+                multi_select_data = prop_data.get("multi_select", [])
+                if multi_select_data:
+                    names = [item.get("name", "") for item in multi_select_data]
+                    text_parts.append(f"{prop_name}: {', '.join(names)}")
+            elif prop_type == "number":
+                number = prop_data.get("number")
+                if number is not None:
+                    text_parts.append(f"{prop_name}: {number}")
+            elif prop_type == "date":
+                date_data = prop_data.get("date")
+                if date_data:
+                    date_str = f"{date_data.get('start', '')} - {date_data.get('end', '')}".strip()
+                    text_parts.append(f"{prop_name}: {date_str}")
+            elif isinstance(prop_data, dict):
+                # Handle other property types
+                if "start" in prop_data:
+                    # Date object
+                    prop_value = f"{prop_data.get('start', '')} - {prop_data.get('end', '')}".strip()
+                    text_parts.append(f"{prop_name}: {prop_value}")
+                else:
+                    text_parts.append(f"{prop_name}: {prop_data}")
+            else:
+                text_parts.append(f"{prop_name}: {prop_data}")
         
         # Extract from blocks (legacy content field)
         contents = page_data.get("content", [])
