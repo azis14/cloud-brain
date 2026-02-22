@@ -4,7 +4,7 @@ import os
 from dotenv import load_dotenv
 from notion_client import Client
 import logging
-from routers import vector_router, waha_router
+from routers import vector_router, waha_router, chatery_router
 from security import Secured
 
 # Load environment variables
@@ -24,6 +24,7 @@ app = FastAPI(
 # Include routers
 app.include_router(vector_router.router)
 app.include_router(waha_router.router)
+app.include_router(chatery_router.router)
 
 # Add CORS middleware
 cors_allow_origins = os.getenv("CORS_ALLOW_ORIGINS", "*")

@@ -18,6 +18,10 @@ patch('services.rag_service.RAGService', return_value=mock_rag_service_instance)
 mock_waha_service_instance = AsyncMock()
 patch('services.waha_service.WahaService', return_value=mock_waha_service_instance).start()
 
+# Mock for ChateryService (needed because main.py imports chatery_router)
+mock_chatery_service_instance = AsyncMock()
+patch('services.chatery_service.ChateryService', return_value=mock_chatery_service_instance).start()
+
 
 # --- Pytest Fixtures ---
 
@@ -36,7 +40,10 @@ def test_client():
             "API_SECRET_KEY": "test-secret-key",
             "WHITELISTED_NUMBERS": "1234567890,9876543210", # Default whitelist for tests
             "WAHA_API_URL": "http://test.waha.api",
-            "WAHA_SESSION_NAME": "test-session"
+            "WAHA_SESSION_NAME": "test-session",
+            "CHATERY_API_URL": "https://test.chatery.api",
+            "CHATERY_API_KEY": "test-chatery-key",
+            "CHATERY_PHONE_NUMBER_ID": "test-phone-id"
         }):
         # Import the app inside the fixture to ensure patches are active
         from main import app
@@ -51,6 +58,7 @@ def reset_mocks():
     """
     mock_rag_service_instance.reset_mock()
     mock_waha_service_instance.reset_mock()
+    mock_chatery_service_instance.reset_mock()
 
 
 # --- Test Cases ---

@@ -19,7 +19,7 @@ async def test_send_whatsapp_reply_success(mocker, set_env_vars):
     """Test successful message sending."""
     # Arrange
     service = WahaService()
-    mock_post = mocker.patch("waha_service.requests.post")
+    mock_post = mocker.patch("services.waha_service.requests.post")
     mock_response = MagicMock()
     mock_response.raise_for_status.return_value = None
     mock_post.return_value = mock_response
@@ -33,7 +33,7 @@ async def test_send_whatsapp_reply_http_error(mocker, set_env_vars, caplog):
     """Test handling HTTP errors during message sending."""
     # Arrange
     service = WahaService()
-    mock_post = mocker.patch("waha_service.requests.post")
+    mock_post = mocker.patch("services.waha_service.requests.post")
     mock_response = MagicMock()
     mock_response.raise_for_status.side_effect = requests.exceptions.HTTPError(
         response=MagicMock(text="HTTP Error")
@@ -54,7 +54,7 @@ async def test_send_whatsapp_reply_request_error(mocker, set_env_vars, caplog):
     mock_request.url = "https://fake.api.url/sendText"
 
     mock_post = mocker.patch(
-        "waha_service.requests.post",
+        "services.waha_service.requests.post",
         side_effect=requests.exceptions.RequestException("Request Error", request=mock_request)
     )
 
