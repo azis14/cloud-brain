@@ -8,6 +8,7 @@
 [![MongoDB](https://img.shields.io/badge/MongoDB-%234ea94b.svg?logo=mongodb&logoColor=white)](https://www.mongodb.com/)
 [![Notion](https://img.shields.io/badge/Notion-000?logo=notion&logoColor=fff)](https://www.notion.com/)
 [![WAHA](https://img.shields.io/badge/WAHA-25d366?logo=WhatsApp&logoColor=fff)](https://waha.devlike.pro/)
+[![Chatery](https://img.shields.io/badge/Chatery-25D366?logo=WhatsApp&logoColor=fff)](https://chatery.com/)
 
 A FastAPI application that connects to the Notion API and provides RAG (Retrieval-Augmented Generation) capabilities using MongoDB Atlas Vector Search and Google AI Studio.
 
@@ -55,11 +56,17 @@ MIN_SIMILARITY_SCORE=0.7
 CORS_ALLOW_ORIGINS=could be '*' or specific origins here
 API_SECRET_KEY=generate_random_string_here
 
-# WAHA configuration
+# WAHA configuration (optional - use WAHA or Chatery for WhatsApp integration)
 WHITELISTED_NUMBERS=your_comma_separated_phone_numbers_here
 WAHA_API_URL=your_url_to_waha_api_here
 WAHA_API_KEY=your_waha_api_key_here
 WAHA_SESSION_NAME=your_waha_session_name_here
+
+# Chatery configuration (optional - alternative to WAHA)
+CHATERY_API_URL=https://api.chatery.com/v1
+CHATERY_API_KEY=your_chatery_api_key_here
+CHATERY_PHONE_NUMBER_ID=your_phone_number_id_here
+CHATERY_WEBHOOK_SECRET=your_webhook_secret_here
 ```
 
 ### 2. MongoDB Atlas Setup
@@ -104,11 +111,15 @@ Once the server is running, visit:
    - Click "Share" → "Invite"
    - Search for your integration name and invite it
 
-## WAHA (WhatsApp HTTP API) Setup
+## WhatsApp Integrations
+
+Cloud Brain supports two WhatsApp integration options: **WAHA** (self-hosted) and **Chatery** (Cloud API). You can use either one or both simultaneously with different phone numbers.
+
+### Option 1: WAHA (WhatsApp HTTP API)
 
 WAHA enables WhatsApp integration, allowing your application to receive and respond to WhatsApp messages with AI-generated answers based on your Notion content.
 
-### Quick Setup
+#### Quick Setup
 
 1. **Install and run WAHA** using Docker:
    ```bash
@@ -128,19 +139,64 @@ WAHA enables WhatsApp integration, allowing your application to receive and resp
 
 4. **Set webhook URL** in WAHA dashboard to: `http://your-app-domain.com/waha/webhook`
 
-### How it works
+#### How it works
 - Incoming WhatsApp messages are sent to your application via webhook
 - Only whitelisted numbers can interact with the bot
 - Messages are processed through the RAG system and responses are sent back via WhatsApp
 
 For detailed installation, configuration, and production deployment instructions, visit the [WAHA official documentation](https://waha.devlike.pro/docs/overview/quick-start).
 
-### Host Waha on Sumopod
+#### Host WAHA on Sumopod
 
 Instead of running WAHA locally, you can host WAHA+ on SumoPod, which offers low cost hosting (starts from IDR20K/month) for small projects like this one. Follow these steps:
 - Sign up for an account on [SumoPod](https://sumopod.com/register?ref=397bb660-81e6-48b8-919d-c0868301d72f)
 - Deploy your WAHA instance by clicking the "Deploy Now" button below.
 - Once deployed, follow the setup guide above to configure your WAHA instance.
+
+### Option 2: Chatery (WhatsApp Cloud API)
+
+Chatery provides a cloud-based WhatsApp Business API integration without the need for self-hosting. This is a simpler alternative to WAHA for production deployments.
+
+#### Quick Setup
+
+1. **Create a Chatery account** and set up a WhatsApp Business connection:
+   - Sign up at [Chatery](https://chatery.com)
+   - Navigate to **Connections** > **Add New Connection** > **WhatsApp**
+   - Connect your WhatsApp Business phone number
+
+2. **Get API credentials** from Chatery dashboard:
+   - Go to **Settings** > **API**
+   - Copy your API URL, API Key, and Phone Number ID
+
+3. **Configure environment variables** in your `.env` file:
+   ```env
+   # Chatery Configuration
+   CHATERY_API_URL=https://api.chatery.com/v1
+   CHATERY_API_KEY=your_chatery_api_key_here
+   CHATERY_PHONE_NUMBER_ID=your_phone_number_id_here
+   CHATERY_WEBHOOK_SECRET=your_webhook_secret_here
+   WHITELISTED_NUMBERS=1234567890,9876543210
+   ```
+
+4. **Set webhook URL** in Chatery dashboard:
+   ```
+   https://your-domain.com/chatery/webhook
+   ```
+
+#### How it works
+- Incoming WhatsApp messages are sent to your application via webhook
+- Webhook requests are verified using the webhook secret
+- Only whitelisted numbers can interact with the bot
+- Messages are processed through the RAG system and responses are sent back via Chatery API
+
+For detailed setup instructions, see the [Chatery Setup Guide](docs/chatery-setup.md).
+
+#### Switching Between WAHA and Chatery
+
+You can use either integration or both simultaneously:
+- **Chatery only**: Fill in Chatery env vars, leave WAHA env vars empty
+- **WAHA only**: Fill in WAHA env vars, leave Chatery env vars empty
+- **Both**: Configure both with different phone numbers and webhook URLs
 
 ## Development
 
